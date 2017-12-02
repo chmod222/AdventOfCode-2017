@@ -24,7 +24,7 @@ sumDuplicatesHalfway' i n xs
 
   where
     current = xs !! i
-    next    = xs !! (i + quot n 2)
+    next    = xs !! (i + n `quot` 2)
 
 -- Common
 splitInput :: String -> [Int]
