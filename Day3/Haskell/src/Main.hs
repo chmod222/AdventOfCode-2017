@@ -49,7 +49,7 @@ generateUlamSpiral = scanl addCoord (0, 0) (generate' 0 0 moveRight)
 
 -- Part 1
 ulamDistance :: Int -> Int
-ulamDistance n = distance (0, 0) (last . take n $ generateUlamSpiral)
+ulamDistance n = distance (0, 0) (last . take n $! generateUlamSpiral)
 
 -- Part 2
 ulamSum :: Int -> Int
@@ -65,11 +65,12 @@ ulamSum n = sum $ map (ulamSum . fst) localNeighbors
 findNextOver :: Int -> Int
 findNextOver n = find' 0 n
   where
-    find' i target =
-      let pointSum = ulamSum i
-      in if pointSum > target
-        then pointSum
-        else find' (succ i) target
+    find' i target
+      | pointSum > target = pointSum
+      | otherwise         = find' (succ i) target
+
+      where
+        pointSum = ulamSum i
 
 main :: IO ()
 main = do
