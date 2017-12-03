@@ -43,7 +43,7 @@ generateUlamSpiral = scanl addCoord (0, 0) (generate' 0 0 moveRight)
   where
     generate' 0 prevStepCount vec = vec : generate' nextSteps' nextSteps' (turnLeft vec)
       where
-        nextSteps' = prevStepCount + nextStepIncrement' (turnLeft vec)
+        nextSteps' = prevStepCount + nextStepIncrement' vec
 
     generate' s prevStepCount vec = vec : generate' (s - 1) prevStepCount vec
 
