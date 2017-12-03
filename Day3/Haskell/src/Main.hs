@@ -1,35 +1,32 @@
-module Main (main, generateUlamSpiral) where
+module Main (main) where
 
 import Prelude hiding (Left, Right)
 import Data.List
+import Data.Maybe
 
 type Coord = (Int, Int)
+type MovementVector = Coord
 
 puzzleInput :: Int
 puzzleInput = 361527
 
-data Direction = Right
-               | Up
-               | Left
-               | Down
-  deriving (Show, Read)
+moveRight = (0, 1)
+moveLeft = (0, -1)
+moveUp = (-1, 0)
+moveDown = (1, 0)
 
-nextDir :: Direction -> Direction
-nextDir Right = Up
-nextDir Up    = Left
-nextDir Left  = Down
-nextDir Down  = Right
+turnLeft :: MovementVector -> MovementVector
+turnLeft vec
+  | vec == moveRight = moveUp
+  | vec == moveUp    = moveLeft
+  | vec == moveLeft  = moveDown
+  | vec == moveDown  = moveRight
+  | otherwise        = undefined
 
-nextStepIncrement :: Direction -> Int
-nextStepIncrement Up   = 1
-nextStepIncrement Down = 1
-nextStepIncrement _    = 0
-
-coordStep :: Direction -> Coord
-coordStep Right = (0, 1)
-coordStep Up    = (-1, 0)
-coordStep Left  = (0, -1)
-coordStep Down  = (1, 0)
+nextStepIncrement' :: MovementVector -> Int
+nextStepIncrement' vec
+  | vec == moveUp || vec == moveDown = 1
+  | otherwise                        = 0
 
 addCoord :: Coord -> Coord -> Coord
 addCoord (y1, x1) (y2, x2) = (y1 + y2, x1 + x2)
@@ -40,43 +37,38 @@ distance (y1, x1) (y2, x2) = (abs $ y1 - y2) + (abs $ x1 - x2)
 isAdjacent :: Coord -> Coord -> Bool
 isAdjacent (y1, x1) (y2, x2) = abs (y1 - y2) <= 1 && abs (x1 - x2) <= 1
 
-generateUlamSpiral :: [Direction]
-generateUlamSpiral = generate' Right 0 0
+
+generateUlamSpiral :: [Coord]
+generateUlamSpiral = scanl addCoord (0, 0) (generate' 0 0 moveRight)
   where
-    generate' dir 0 prevStepCount = dir : generate' nextDirection nextSteps nextSteps
+    generate' 0 prevStepCount vec = vec : generate' nextSteps' nextSteps' (turnLeft vec)
       where
-        nextSteps = prevStepCount + nextStepIncrement dir
-        nextDirection = nextDir dir
+        nextSteps' = prevStepCount + nextStepIncrement' (turnLeft vec)
 
-    generate' dir s prevStepCount = dir : generate' dir (s - 1) prevStepCount
-
-
-buildCoordinates :: [Direction] -> (Int, Int) -> (Coord, [Coord])
-buildCoordinates spiral center = (finalCoord, center : coords)
-  where
-    (finalCoord, coords) = mapAccumL
-        (\acc dir -> ( addCoord acc (coordStep dir)
-                     , addCoord acc (coordStep dir))) center spiral
+    generate' s prevStepCount vec = vec : generate' (s - 1) prevStepCount vec
 
 -- Part 1
 ulamDistance :: Int -> Int
-ulamDistance n = distance (0, 0) (fst $ buildCoordinates (take (n - 1) generateUlamSpiral) (0, 0))
+ulamDistance n = distance (0, 0) (last . take n $ generateUlamSpiral)
 
 -- Part 2
 ulamSum :: Int -> Int
 ulamSum 0 = 1
 ulamSum n = sum $ map (ulamSum . fst) localNeighbors
   where
-    (currentPosition', allPrevious') = buildCoordinates (take n generateUlamSpiral) (0, 0)
+    spiral = take (n + 1) generateUlamSpiral
+    curPos = last spiral
+    prevCoords = init spiral
 
-    localNeighbors = filter (\(n, coord) -> isAdjacent coord currentPosition') (zip [0 .. n-1] allPrevious')
+    localNeighbors = filter (\(n, coord) -> isAdjacent coord curPos) (zip [0..] prevCoords)
 
 findNextOver :: Int -> Int
 findNextOver n = find' 0 n
   where
     find' i target =
-      if ulamSum i > target
-        then ulamSum i
+      let pointSum = ulamSum i
+      in if pointSum > target
+        then pointSum
         else find' (succ i) target
 
 main :: IO ()
