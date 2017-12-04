@@ -1,6 +1,5 @@
 module Main (main) where
 
-import Prelude hiding (Left, Right)
 import Data.List
 import Data.Maybe
 
@@ -49,7 +48,7 @@ generateUlamSpiral = scanl addCoord (0, 0) (generate' 0 0 moveRight)
 
 -- Part 1
 ulamDistance :: Int -> Int
-ulamDistance n = distance (0, 0) (last . take n $! generateUlamSpiral)
+ulamDistance n = distance (0, 0) (last . take n $ generateUlamSpiral)
 
 -- Part 2
 ulamSum :: Int -> Int
