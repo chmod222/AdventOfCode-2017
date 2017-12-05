@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Main where
 
 import qualified Data.Vector.Unboxed.Mutable as VM
@@ -12,27 +13,17 @@ type IndexToucher = Int -> Int
 escapeJumplist' :: V.Vector Int -> IndexToucher -> Int
 escapeJumplist' list fn = runST $ do
     vec <- V.thaw list
-    escape' vec 0
+    escape' vec 0 0
 
   where
-    escape' :: (PrimMonad m) => V.MVector (PrimState m) Int -> Int -> m Int
-    escape' vec idx = do
-      newIdx <- jump' vec idx fn
+    escape' :: (PrimMonad m) => V.MVector (PrimState m) Int -> Int -> Int -> m Int
+    escape' vec !idx !acc
+      | idx >= VM.length vec = return acc
+      | otherwise =
+        do jumpLen <- VM.unsafeRead vec idx
+           VM.unsafeModify vec fn idx
 
-      if newIdx >= VM.length vec
-        then return 1
-        else succ `fmap` escape' vec newIdx
-
-jump' :: (PrimMonad m) =>
-     V.MVector (PrimState m) Int
-  -> Int
-  -> IndexToucher
-  -> m Int
-jump' vec pos fn = do
-  jumpLen <- VM.unsafeRead vec pos
-  VM.unsafeModify vec fn pos
-
-  return $ pos + jumpLen
+           escape' vec (idx + jumpLen) (succ acc)
 
 -- Traditional, about half as fast as ST mutable
 escapeJumplist :: V.Vector Int -> IndexToucher -> Int
