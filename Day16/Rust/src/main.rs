@@ -10,19 +10,19 @@ impl Pattern {
         let (lead, trail) = inp.split_at(1);
 
         match lead {
-            "s" => Some(Pattern::Spin(trail.parse().unwrap())),
+            "s" => Some(Pattern::Spin(trail.parse().ok()?)),
             "x" => {
                 let mut parts = trail.split('/');
-                let a = parts.next().unwrap().parse().unwrap();
-                let b = parts.next().unwrap().parse().unwrap();
+                let a = parts.next()?.parse().ok()?;
+                let b = parts.next()?.parse().ok()?;
 
                 Some(Pattern::Exchange(a, b))
             }
 
             "p" => {
                 let mut parts = trail.split('/');
-                let a = parts.next().unwrap().chars().nth(0).unwrap();
-                let b = parts.next().unwrap().chars().nth(0).unwrap();
+                let a = parts.next()?.parse().ok()?;
+                let b = parts.next()?.parse().ok()?;
 
                 Some(Pattern::Partner(a, b))
             }
