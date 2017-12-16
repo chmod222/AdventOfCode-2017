@@ -1,1 +1,9 @@
+# Haskell working directories
 .stack-work
+
+# Rust output
+target/
+
+# C++ output
+*.o
+day*
