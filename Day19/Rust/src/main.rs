@@ -19,12 +19,7 @@ impl Direction {
     }
 
     fn right(self) -> Direction {
-        match self {
-            Direction::North => Direction::East,
-            Direction::East => Direction::South,
-            Direction::South => Direction::West,
-            Direction::West => Direction::North,
-        }
+        self.left().left().left()
     }
 }
 
