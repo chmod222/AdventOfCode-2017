@@ -8,13 +8,13 @@ use std::time::Duration;
 type Word = i64;
 type Register = char;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 enum Operand {
     Const(Word),
     Register(Register)
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 enum Instruction {
     Snd(Operand),
     Set(Register, Operand),
