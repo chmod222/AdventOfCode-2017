@@ -46,7 +46,7 @@ fn main() {
     let mut all = Vec::new();
 
     for component in &input {
-        if component.0 == 0 || component.1 == 0 {
+        if component.matches(0) {
             build_bridge(&input, max(component.0, component.1), &[*component], &mut all);
         }
     }
